@@ -5,29 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hustensaft Jump</title>
   <style>
-    html, body {
+    /* Allgemeine Stile */
+    body, html {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: linear-gradient(180deg, #5f00ba, #000000);
+      height: 100%;
+      background-color: #111;
       font-family: 'Arial', sans-serif;
+      color: white;
     }
 
+    /* Zentrieren des Canvas */
     #gameCanvas {
       display: block;
+      margin: 0 auto;
       background-color: transparent;
     }
 
-    #score {
+    #score, #startButton, #retryButton {
       position: absolute;
-      top: 10px;
-      left: 10px;
       color: white;
       font-size: 24px;
+      text-align: center;
       z-index: 10;
     }
 
-    /* Für das WASTED-Bild */
+    #startButton {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
+      padding: 20px;
+      background-color: #ff6600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #retryButton {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
+      padding: 20px;
+      background-color: #ff6600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* Wasted Text */
     #wasted {
       position: absolute;
       top: 50%;
@@ -38,22 +68,47 @@
       font-weight: bold;
       display: none;
     }
+
+    /* Start-Screen */
+    #startScreen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40px;
+      text-align: center;
+      display: block;
+    }
   </style>
 </head>
 <body>
+  <!-- Game Canvas -->
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <!-- Startscreen und Buttons -->
+  <div id="startScreen">
+    <h1>Willkommen bei Hustensaft Jump!</h1>
+    <button id="startButton">Spiel Starten</button>
+  </div>
+
   <div id="score">Score: 0</div>
   <div id="wasted">WASTED</div>
+  <button id="retryButton">Erneut Spielen</button>
 
   <!-- Sounds -->
   <audio id="jumpSound" src="https://www.myinstants.com/media/sounds/mario-jump.mp3"></audio>
-  <audio id="deathSound" src="gta5.mp3"></audio>
+  <audio id="deathSound" src="gta5.mp3"></audio> <!-- Anpassen: Der GTA5-Sound befindet sich jetzt im gleichen Verzeichnis -->
 
   <script>
+    // Canvas und Kontext
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const wastedText = document.getElementById("wasted");
+    const startScreen = document.getElementById("startScreen");
+    const startButton = document.getElementById("startButton");
+    const retryButton = document.getElementById("retryButton");
 
+    // Twitch Logo
     const twitchLogo = new Image();
     twitchLogo.src = "https://upload.wikimedia.org/wikipedia/commons/2/26/Twitch_logo.svg";
 
@@ -70,8 +125,10 @@
     let platforms = [];
     const platformCount = 7;
     let score = 0;
+    let gameRunning = false;
 
     function initPlatforms() {
+      platforms = [];
       for (let i = 0; i < platformCount; i++) {
         platforms.push({
           x: Math.random() * 360,
@@ -101,10 +158,7 @@
         playDeathSound();
         setTimeout(() => {
           showWasted();
-          setTimeout(() => {
-            alert("Game Over! Score: " + score);
-            document.location.reload();
-          }, 2000);
+          retryButton.style.display = "block";
         }, 500);
       }
 
@@ -141,6 +195,7 @@
     }
 
     function gameLoop() {
+      if (!gameRunning) return;
       update();
       draw();
       requestAnimationFrame(gameLoop);
@@ -161,16 +216,26 @@
     document.addEventListener("keydown", e => keys[e.key] = true);
     document.addEventListener("keyup", e => keys[e.key] = false);
 
-    function loop() {
-      movePlayer();
-      requestAnimationFrame(loop);
-    }
-
-    twitchLogo.onload = () => {
+    // Startscreen Button
+    startButton.addEventListener("click", () => {
+      startScreen.style.display = "none";
+      gameRunning = true;
       initPlatforms();
       gameLoop();
-      loop();
-    };
+    });
+
+    // Retry Button
+    retryButton.addEventListener("click", () => {
+      player.y = 500;
+      player.velocityY = 0;
+      score = 0;
+      document.getElementById("score").textContent = "Score: " + score;
+      retryButton.style.display = "none";
+      wastedText.style.display = "none";
+      gameRunning = true;
+      initPlatforms();
+      gameLoop();
+    });
 
     // Sounds
     const jumpSound = document.getElementById("jumpSound");
@@ -210,7 +275,6 @@
       startX = e.touches[0].clientX;
     });
 
-    loop();
   </script>
 </body>
 </html>
