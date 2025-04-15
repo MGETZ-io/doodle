@@ -179,6 +179,7 @@
       player.velocityY += player.gravity;
       player.y += player.velocityY;
 
+      // Spieler stirbt nur, wenn er den Boden unter den Plattformen erreicht
       if (player.y > 600) {
         playDeathSound();
         setTimeout(() => {
@@ -254,6 +255,7 @@
       startScreen.style.display = "none";
       gameRunning = true;
       initPlatforms();
+      respawnPlayer();
       gameLoop();
     });
 
@@ -267,8 +269,17 @@
       wastedText.style.display = "none";
       gameRunning = true;
       initPlatforms();
+      respawnPlayer();
       gameLoop();
     });
+
+    // Respawn Player auf der ersten Plattform
+    function respawnPlayer() {
+      let platform = platforms[Math.floor(Math.random() * platforms.length)];
+      player.x = platform.x + (platform.width - player.width) / 2;
+      player.y = platform.y - player.height;
+      player.velocityY = 0;
+    }
 
     // Sounds
     const jumpSound = document.getElementById("jumpSound");
