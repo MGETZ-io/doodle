@@ -203,7 +203,10 @@
             p.width *= 0.8; // Plattform wird kleiner
           } else if (p.hits === 2) {
             p.y = -100; // Plattform verschwindet
-            score += 1; // Punkt für Kollision von unten
+          }
+          // Zähler für Score erhöhen
+          if (player.y + player.height <= p.y + 10) {
+            score += 1; // Punkte für das Treffen von unten
             scoreElement.textContent = "Score: " + score; // Update the score text
           }
           playJumpSound();
