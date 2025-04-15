@@ -112,7 +112,7 @@
 
   <!-- Game Area -->
   <div class="gameArea">
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <canvas id="gameCanvas" width="500" height="600"></canvas>
   </div>
 
   <div id="score">Score: 0</div>
@@ -155,7 +155,7 @@
       platforms = [];
       for (let i = 0; i < platformCount; i++) {
         platforms.push({
-          x: Math.random() * 360,
+          x: Math.random() * (canvas.width - 60),
           y: 600 - i * 100,
           width: 60,
           height: 10,
@@ -180,7 +180,7 @@
       player.y += player.velocityY;
 
       // Spieler stirbt nur, wenn er den Boden unter den Plattformen erreicht
-      if (player.y > 600) {
+      if (player.y > canvas.height) {
         playDeathSound();
         setTimeout(() => {
           showWasted();
@@ -212,9 +212,9 @@
       if (player.y < 300) {
         platforms.forEach(p => {
           p.y += Math.abs(player.velocityY);
-          if (p.y > 600) {
+          if (p.y > canvas.height) {
             p.y = 0;
-            p.x = Math.random() * 360;
+            p.x = Math.random() * (canvas.width - 60);
             p.width = 60; // Neue Plattform kommt in voller Größe
             p.hits = 0;
           }
@@ -305,18 +305,24 @@
 
     // Steuerung per Tasten oder Swipe
     let startX = 0;
+    let threshold = 20; // Schwelle für swipe-Erkennung
+    let swipeSpeed = 7; // Geschwindigkeit für Swipe-Bewegung
+
+    // Mobile Swipe Steuerung
     canvas.addEventListener("touchstart", e => {
       startX = e.touches[0].clientX;
     });
 
     canvas.addEventListener("touchmove", e => {
       let dx = e.touches[0].clientX - startX;
-      if (dx < -20) {
-        player.x -= 5;
-      } else if (dx > 20) {
-        player.x += 5;
+      if (Math.abs(dx) > threshold) {
+        if (dx < 0) {
+          player.x -= swipeSpeed;
+        } else if (dx > 0) {
+          player.x += swipeSpeed;
+        }
+        startX = e.touches[0].clientX;
       }
-      startX = e.touches[0].clientX;
     });
   </script>
 </body>
