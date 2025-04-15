@@ -16,45 +16,62 @@
       color: white;
     }
 
-    /* Zentrieren des Canvas */
+    /* Mittlerer Bereich */
+    .gameArea {
+      position: absolute;
+      top: 50px;
+      left: 50px;
+      right: 50px;
+      bottom: 50px;
+      background-color: #333;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Canvas */
     #gameCanvas {
       display: block;
-      margin: 0 auto;
       background-color: transparent;
     }
 
-    #score, #startButton, #retryButton {
+    /* Startscreen */
+    #startScreen {
       position: absolute;
-      color: white;
-      font-size: 24px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
       text-align: center;
-      z-index: 10;
+      color: white;
+    }
+
+    #startScreen h1 {
+      font-size: 40px;
+      margin-bottom: 20px;
     }
 
     #startButton {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       font-size: 30px;
       padding: 20px;
       background-color: #ff6600;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      display: none;
+      color: white;
     }
 
-    #retryButton {
-      top: 50%;
+    /* Score */
+    #score {
+      position: absolute;
+      top: 10px;
       left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 30px;
-      padding: 20px;
-      background-color: #ff6600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      display: none;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: white;
+      z-index: 10;
     }
 
     /* Wasted Text */
@@ -69,26 +86,32 @@
       display: none;
     }
 
-    /* Start-Screen */
-    #startScreen {
+    /* Retry Button */
+    #retryButton {
       position: absolute;
-      top: 50%;
+      top: 60%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 40px;
-      text-align: center;
-      display: block;
+      font-size: 30px;
+      padding: 20px;
+      background-color: #ff6600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <!-- Game Canvas -->
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-
-  <!-- Startscreen und Buttons -->
+  <!-- Startscreen -->
   <div id="startScreen">
     <h1>Willkommen bei Hustensaft Jump!</h1>
     <button id="startButton">Spiel Starten</button>
+  </div>
+
+  <!-- Game Area -->
+  <div class="gameArea">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
   </div>
 
   <div id="score">Score: 0</div>
@@ -97,7 +120,7 @@
 
   <!-- Sounds -->
   <audio id="jumpSound" src="https://www.myinstants.com/media/sounds/mario-jump.mp3"></audio>
-  <audio id="deathSound" src="gta5.mp3"></audio> <!-- Anpassen: Der GTA5-Sound befindet sich jetzt im gleichen Verzeichnis -->
+  <audio id="deathSound" src="gta5.mp3"></audio>
 
   <script>
     // Canvas und Kontext
@@ -118,8 +141,8 @@
       width: 40,
       height: 40,
       velocityY: 0,
-      jumpStrength: 15,
-      gravity: 0.6
+      jumpStrength: 10,
+      gravity: 0.5
     };
 
     let platforms = [];
@@ -132,9 +155,10 @@
       for (let i = 0; i < platformCount; i++) {
         platforms.push({
           x: Math.random() * 360,
-          y: 600 - i * 80,
+          y: 600 - i * 100,
           width: 60,
-          height: 10
+          height: 10,
+          hits: 0
         });
       }
     }
@@ -144,7 +168,7 @@
     }
 
     function drawPlatforms() {
-      ctx.fillStyle = "#ffffffaa";
+      ctx.fillStyle = "#ffffff";
       platforms.forEach(p => {
         ctx.fillRect(p.x, p.y, p.width, p.height);
       });
@@ -171,9 +195,15 @@
           player.velocityY > 0
         ) {
           player.velocityY = -player.jumpStrength;
-          score++;
+          p.hits += 1;
+          if (p.hits === 1) {
+            p.width *= 0.8; // Plattform wird kleiner
+          } else if (p.hits === 2) {
+            p.y = -100; // Plattform verschwindet
+            score += 1; // Punkt für Kollision von unten
+            document.getElementById("score").textContent = "Score: " + score;
+          }
           playJumpSound();
-          document.getElementById("score").textContent = "Score: " + score;
         }
       });
 
@@ -183,6 +213,8 @@
           if (p.y > 600) {
             p.y = 0;
             p.x = Math.random() * 360;
+            p.width = 60; // Neue Plattform kommt in voller Größe
+            p.hits = 0;
           }
         });
       }
