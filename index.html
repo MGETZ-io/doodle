@@ -131,6 +131,7 @@
     const startScreen = document.getElementById("startScreen");
     const startButton = document.getElementById("startButton");
     const retryButton = document.getElementById("retryButton");
+    const scoreElement = document.getElementById("score");
 
     // Twitch Logo
     const twitchLogo = new Image();
@@ -203,7 +204,7 @@
           } else if (p.hits === 2) {
             p.y = -100; // Plattform verschwindet
             score += 1; // Punkt für Kollision von unten
-            document.getElementById("score").textContent = "Score: " + score;
+            scoreElement.textContent = "Score: " + score; // Update the score text
           }
           playJumpSound();
         }
