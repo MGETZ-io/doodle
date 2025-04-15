@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hustensaft Jump</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: linear-gradient(180deg, #5f00ba, #000000);
+      font-family: 'Arial', sans-serif;
+    }
+
+    #gameCanvas {
+      display: block;
+      background-color: transparent;
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 24px;
+      z-index: 10;
+    }
+
+    /* Für das WASTED-Bild */
+    #wasted {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 50px;
+      color: red;
+      font-weight: bold;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="score">Score: 0</div>
+  <div id="wasted">WASTED</div>
+
+  <!-- Sounds -->
+  <audio id="jumpSound" src="https://www.myinstants.com/media/sounds/mario-jump.mp3"></audio>
+  <audio id="deathSound" src="gta5.mp3"></audio>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const wastedText = document.getElementById("wasted");
+
+    const twitchLogo = new Image();
+    twitchLogo.src = "https://upload.wikimedia.org/wikipedia/commons/2/26/Twitch_logo.svg";
+
+    let player = {
+      x: 200,
+      y: 500,
+      width: 40,
+      height: 40,
+      velocityY: 0,
+      jumpStrength: 15,
+      gravity: 0.6
+    };
+
+    let platforms = [];
+    const platformCount = 7;
+    let score = 0;
+
+    function initPlatforms() {
+      for (let i = 0; i < platformCount; i++) {
+        platforms.push({
+          x: Math.random() * 360,
+          y: 600 - i * 80,
+          width: 60,
+          height: 10
+        });
+      }
+    }
+
+    function drawPlayer() {
+      ctx.drawImage(twitchLogo, player.x, player.y, player.width, player.height);
+    }
+
+    function drawPlatforms() {
+      ctx.fillStyle = "#ffffffaa";
+      platforms.forEach(p => {
+        ctx.fillRect(p.x, p.y, p.width, p.height);
+      });
+    }
+
+    function update() {
+      player.velocityY += player.gravity;
+      player.y += player.velocityY;
+
+      if (player.y > 600) {
+        playDeathSound();
+        setTimeout(() => {
+          showWasted();
+          setTimeout(() => {
+            alert("Game Over! Score: " + score);
+            document.location.reload();
+          }, 2000);
+        }, 500);
+      }
+
+      platforms.forEach(p => {
+        if (
+          player.x + player.width > p.x &&
+          player.x < p.x + p.width &&
+          player.y + player.height > p.y &&
+          player.y + player.height < p.y + p.height + 10 &&
+          player.velocityY > 0
+        ) {
+          player.velocityY = -player.jumpStrength;
+          score++;
+          playJumpSound();
+          document.getElementById("score").textContent = "Score: " + score;
+        }
+      });
+
+      if (player.y < 300) {
+        platforms.forEach(p => {
+          p.y += Math.abs(player.velocityY);
+          if (p.y > 600) {
+            p.y = 0;
+            p.x = Math.random() * 360;
+          }
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlatforms();
+      drawPlayer();
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function movePlayer() {
+      if (keys["ArrowLeft"]) {
+        player.x -= 5;
+        if (player.x < 0) player.x = 0;
+      }
+      if (keys["ArrowRight"]) {
+        player.x += 5;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+      }
+    }
+
+    let keys = {};
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+
+    function loop() {
+      movePlayer();
+      requestAnimationFrame(loop);
+    }
+
+    twitchLogo.onload = () => {
+      initPlatforms();
+      gameLoop();
+      loop();
+    };
+
+    // Sounds
+    const jumpSound = document.getElementById("jumpSound");
+    const deathSound = document.getElementById("deathSound");
+
+    function playJumpSound() {
+      jumpSound.currentTime = 0;
+      jumpSound.play().catch(() => {});
+    }
+
+    function playDeathSound() {
+      deathSound.currentTime = 0;
+      deathSound.play().catch(() => {});
+    }
+
+    // WASTED Text anzeigen
+    function showWasted() {
+      wastedText.style.display = "block";
+      setTimeout(() => {
+        wastedText.style.display = "none";
+      }, 1500);
+    }
+
+    // Steuerung per Tasten oder Swipe
+    let startX = 0;
+    canvas.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+    });
+
+    canvas.addEventListener("touchmove", e => {
+      let dx = e.touches[0].clientX - startX;
+      if (dx < -20) {
+        player.x -= 5;
+      } else if (dx > 20) {
+        player.x += 5;
+      }
+      startX = e.touches[0].clientX;
+    });
+
+    loop();
+  </script>
+</body>
+</html>
