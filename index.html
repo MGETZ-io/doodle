@@ -235,21 +235,6 @@
       requestAnimationFrame(gameLoop);
     }
 
-    function movePlayer() {
-      if (keys["ArrowLeft"]) {
-        player.x -= 5;
-        if (player.x < 0) player.x = 0;
-      }
-      if (keys["ArrowRight"]) {
-        player.x += 5;
-        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-      }
-    }
-
-    let keys = {};
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
-
     // Startscreen Button
     startButton.addEventListener("click", () => {
       startScreen.style.display = "none";
@@ -304,11 +289,33 @@
     }
 
     // Steuerung per Tasten oder Swipe
+    let keys = {};
+
+    document.addEventListener("keydown", e => {
+      keys[e.key] = true;
+    });
+    
+    document.addEventListener("keyup", e => {
+      keys[e.key] = false;
+    });
+
+    // Mobile Swipe Steuerung
     let startX = 0;
     let threshold = 20; // Schwelle für swipe-Erkennung
     let swipeSpeed = 7; // Geschwindigkeit für Swipe-Bewegung
 
-    // Mobile Swipe Steuerung
+    // Steuerung auf dem PC mit Pfeiltasten
+    function movePlayer() {
+      if (keys["ArrowLeft"]) {
+        player.x -= 5;
+        if (player.x < 0) player.x = 0;
+      }
+      if (keys["ArrowRight"]) {
+        player.x += 5;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+      }
+    }
+
     canvas.addEventListener("touchstart", e => {
       startX = e.touches[0].clientX;
     });
@@ -324,6 +331,15 @@
         startX = e.touches[0].clientX;
       }
     });
+
+    // Hauptspiel Schleife
+    function gameLoop() {
+      if (!gameRunning) return;
+      movePlayer(); // Spieler bewegen
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
   </script>
 </body>
 </html>
