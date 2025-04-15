@@ -142,8 +142,8 @@
       width: 40,
       height: 40,
       velocityY: 0,
-      jumpStrength: 10,
-      gravity: 0.5
+      jumpStrength: 12, // Sprungstärke etwas angepasst
+      gravity: 0.3 // Schwerkraft verringert, um langsamer zu sinken
     };
 
     let platforms = [];
@@ -156,7 +156,7 @@
       for (let i = 0; i < platformCount; i++) {
         platforms.push({
           x: Math.random() * (canvas.width - 60),
-          y: 600 - i * 100,
+          y: 600 - i * 150, // Mehr Abstand zwischen den Plattformen, damit es nicht zu schwer ist
           width: 60,
           height: 10,
           hits: 0
@@ -246,16 +246,7 @@
 
     // Retry Button
     retryButton.addEventListener("click", () => {
-      player.y = 500;
-      player.velocityY = 0;
-      score = 0;
-      document.getElementById("score").textContent = "Score: " + score;
-      retryButton.style.display = "none";
-      wastedText.style.display = "none";
-      gameRunning = true;
-      initPlatforms();
-      respawnPlayer();
-      gameLoop();
+      location.reload(); // Seite neu laden, um zurück zum Startscreen zu gelangen
     });
 
     // Respawn Player auf der ersten Plattform
@@ -299,19 +290,14 @@
       keys[e.key] = false;
     });
 
-    // Mobile Swipe Steuerung
-    let startX = 0;
-    let threshold = 20; // Schwelle für swipe-Erkennung
-    let swipeSpeed = 7; // Geschwindigkeit für Swipe-Bewegung
-
     // Steuerung auf dem PC mit Pfeiltasten
     function movePlayer() {
       if (keys["ArrowLeft"]) {
-        player.x -= 5;
+        player.x -= 7; // Geschwindigkeit des Spielers erhöht
         if (player.x < 0) player.x = 0;
       }
       if (keys["ArrowRight"]) {
-        player.x += 5;
+        player.x += 7; // Geschwindigkeit des Spielers erhöht
         if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
       }
     }
